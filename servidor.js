@@ -1,11 +1,11 @@
-var http = require('http');
-var fs = require('fs');
-var path = require('path');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-var PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 function ponerEncabezadosCors(res, contentType) {
-    var headers = {
+    const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type'
@@ -18,7 +18,7 @@ function ponerEncabezadosCors(res, contentType) {
     res.writeHead(200, headers);
 }
 
-var servidor = http.createServer(function(req, res) {
+const servidor = http.createServer(function(req, res) {
     if (req.method === 'OPTIONS') {
         res.writeHead(204, {
             'Access-Control-Allow-Origin': '*',
@@ -30,7 +30,7 @@ var servidor = http.createServer(function(req, res) {
     }
 
     if (req.method === 'GET' && req.url === '/') {
-        var rutaIndex = path.join(__dirname, 'index.html');
+        const rutaIndex = path.join(__dirname, 'index.html');
         fs.readFile(rutaIndex, function(err, contenido) {
             if (err) {
                 res.writeHead(500, {'Content-Type': 'text/plain; charset=utf-8'});
@@ -44,7 +44,7 @@ var servidor = http.createServer(function(req, res) {
     }
 
     if (req.method === 'GET' && req.url === '/script.js') {
-        var rutaScript = path.join(__dirname, 'script.js');
+        const rutaScript = path.join(__dirname, 'script.js');
         fs.readFile(rutaScript, function(err, contenido) {
             if (err) {
                 res.writeHead(500, {'Content-Type': 'text/plain; charset=utf-8'});
@@ -58,13 +58,13 @@ var servidor = http.createServer(function(req, res) {
     }
 
     if (req.method === 'POST' && req.url === '/calcular') {
-        var cuerpo = '';
+        let cuerpo = '';
         req.on('data', function(chunk) {
             cuerpo += chunk;
         });
 
         req.on('end', function() {
-            var datos;
+            let datos;
             try {
                 datos = JSON.parse(cuerpo);
             } catch (e) {
@@ -76,9 +76,9 @@ var servidor = http.createServer(function(req, res) {
                 return;
             }
 
-            var m1 = datos.matriz1;
-            var m2 = datos.matriz2;
-            var operacion = datos.operacion || 'suma';
+            const m1 = datos.matriz1;
+            const m2 = datos.matriz2;
+            const operacion = datos.operacion || 'suma';
 
             if (!Array.isArray(m1) || !Array.isArray(m2)) {
                 res.writeHead(400, {
@@ -89,7 +89,7 @@ var servidor = http.createServer(function(req, res) {
                 return;
             }
 
-            var resultado = [];
+            const resultado = [];
 
             if (operacion === 'multiplicacion') {
                 if (!Array.isArray(m1[0]) || !Array.isArray(m2[0]) || m1[0].length !== m2.length) {
@@ -101,11 +101,11 @@ var servidor = http.createServer(function(req, res) {
                     return;
                 }
 
-                for (var i = 0; i < m1.length; i++) {
-                    var filaMultiplicacion = [];
-                    for (var j = 0; j < m2[0].length; j++) {
-                        var suma = 0;
-                        for (var k = 0; k < m2.length; k++) {
+                for (let i = 0; i < m1.length; i++) {
+                    const filaMultiplicacion = [];
+                    for (let j = 0; j < m2[0].length; j++) {
+                        let suma = 0;
+                        for (let k = 0; k < m2.length; k++) {
                             suma = suma + (m1[i][k] * m2[k][j]);
                         }
                         filaMultiplicacion.push(suma);
@@ -123,7 +123,7 @@ var servidor = http.createServer(function(req, res) {
                 }
 
                 // Lógica de suma arcaica
-                for (var i = 0; i < m1.length; i++) {
+                for (let i = 0; i < m1.length; i++) {
                     if (!Array.isArray(m1[i]) || !Array.isArray(m2[i]) || m1[i].length !== m2[i].length) {
                         res.writeHead(400, {
                             'Access-Control-Allow-Origin': '*',
@@ -132,8 +132,8 @@ var servidor = http.createServer(function(req, res) {
                         res.end(JSON.stringify({ error: 'Dimensiones incompatibles' }));
                         return;
                     }
-                    var filaRes = [];
-                    for (var j = 0; j < m1[i].length; j++) {
+                    const filaRes = [];
+                    for (let j = 0; j < m1[i].length; j++) {
                         filaRes.push(m1[i][j] + m2[i][j]);
                     }
                     resultado.push(filaRes);
