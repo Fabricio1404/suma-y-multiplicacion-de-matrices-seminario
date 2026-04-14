@@ -1,6 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-import os
 
 
 PORT = 5000
@@ -64,7 +63,7 @@ class MiServidor(BaseHTTPRequestHandler):
         matriz2 = datos.get("matriz2")
         operacion = datos.get("operacion", "suma")
 
-        if not isinstance(matriz1, list) or not isinstance(matriz2, list):
+        if not self._es_matriz_valida(matriz1) or not self._es_matriz_valida(matriz2):
             self._enviar_json(400, {"error": "Matrices inválidas"})
             return
 
@@ -86,38 +85,54 @@ class MiServidor(BaseHTTPRequestHandler):
         self._poner_encabezados_cors(codigo, "application/json; charset=utf-8")
         self.wfile.write(contenido.encode("utf-8"))
 
+    def _es_matriz_valida(self, matriz):
+        if not isinstance(matriz, list) or len(matriz) == 0:
+            return False
+        if not isinstance(matriz[0], list) or len(matriz[0]) == 0:
+            return False
+
+        columnas = len(matriz[0])
+        for fila in matriz:
+            if not isinstance(fila, list) or len(fila) != columnas:
+                return False
+            for valor in fila:
+                if not isinstance(valor, (int, float)):
+                    return False
+
+        return True
+
+    def _dimensiones(self, matriz):
+        return len(matriz), len(matriz[0])
+
     def _sumar(self, matriz1, matriz2):
-        if len(matriz1) != len(matriz2):
+        filas1, columnas1 = self._dimensiones(matriz1)
+        filas2, columnas2 = self._dimensiones(matriz2)
+
+        if filas1 != filas2 or columnas1 != columnas2:
             return None
 
         resultado = []
-        for i in range(len(matriz1)):
-            if not isinstance(matriz1[i], list) or not isinstance(matriz2[i], list):
-                return None
-            if len(matriz1[i]) != len(matriz2[i]):
-                return None
-
+        for i in range(filas1):
             fila = []
-            for j in range(len(matriz1[i])):
+            for j in range(columnas1):
                 fila.append(matriz1[i][j] + matriz2[i][j])
             resultado.append(fila)
 
         return resultado
 
     def _multiplicar(self, matriz1, matriz2):
-        if len(matriz1) == 0 or len(matriz2) == 0:
-            return None
-        if not isinstance(matriz1[0], list) or not isinstance(matriz2[0], list):
-            return None
-        if len(matriz1[0]) != len(matriz2):
+        filas1, columnas1 = self._dimensiones(matriz1)
+        filas2, columnas2 = self._dimensiones(matriz2)
+
+        if columnas1 != filas2:
             return None
 
         resultado = []
-        for i in range(len(matriz1)):
+        for i in range(filas1):
             fila = []
-            for j in range(len(matriz2[0])):
+            for j in range(columnas2):
                 suma = 0
-                for k in range(len(matriz2)):
+                for k in range(filas2):
                     suma = suma + (matriz1[i][k] * matriz2[k][j])
                 fila.append(suma)
             resultado.append(fila)

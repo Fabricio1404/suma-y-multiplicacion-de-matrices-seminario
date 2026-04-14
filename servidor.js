@@ -4,6 +4,35 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
+function obtenerDimensiones(matriz) {
+    return {
+        filas: matriz.length,
+        columnas: matriz[0].length
+    };
+}
+
+function esMatrizValida(matriz) {
+    if (!Array.isArray(matriz) || matriz.length === 0 || !Array.isArray(matriz[0]) || matriz[0].length === 0) {
+        return false;
+    }
+
+    const columnas = matriz[0].length;
+
+    for (let i = 0; i < matriz.length; i++) {
+        if (!Array.isArray(matriz[i]) || matriz[i].length !== columnas) {
+            return false;
+        }
+
+        for (let j = 0; j < matriz[i].length; j++) {
+            if (typeof matriz[i][j] !== 'number' || Number.isNaN(matriz[i][j])) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 function ponerEncabezadosCors(res, contentType) {
     const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -80,7 +109,7 @@ const servidor = http.createServer(function(req, res) {
             const m2 = datos.matriz2;
             const operacion = datos.operacion || 'suma';
 
-            if (!Array.isArray(m1) || !Array.isArray(m2)) {
+            if (!esMatrizValida(m1) || !esMatrizValida(m2)) {
                 res.writeHead(400, {
                     'Access-Control-Allow-Origin': '*',
                     'Content-Type': 'application/json'
@@ -90,9 +119,11 @@ const servidor = http.createServer(function(req, res) {
             }
 
             const resultado = [];
+            const dim1 = obtenerDimensiones(m1);
+            const dim2 = obtenerDimensiones(m2);
 
             if (operacion === 'multiplicacion') {
-                if (!Array.isArray(m1[0]) || !Array.isArray(m2[0]) || m1[0].length !== m2.length) {
+                if (dim1.columnas !== dim2.filas) {
                     res.writeHead(400, {
                         'Access-Control-Allow-Origin': '*',
                         'Content-Type': 'application/json'
@@ -101,11 +132,11 @@ const servidor = http.createServer(function(req, res) {
                     return;
                 }
 
-                for (let i = 0; i < m1.length; i++) {
+                for (let i = 0; i < dim1.filas; i++) {
                     const filaMultiplicacion = [];
-                    for (let j = 0; j < m2[0].length; j++) {
+                    for (let j = 0; j < dim2.columnas; j++) {
                         let suma = 0;
-                        for (let k = 0; k < m2.length; k++) {
+                        for (let k = 0; k < dim2.filas; k++) {
                             suma = suma + (m1[i][k] * m2[k][j]);
                         }
                         filaMultiplicacion.push(suma);
@@ -113,7 +144,7 @@ const servidor = http.createServer(function(req, res) {
                     resultado.push(filaMultiplicacion);
                 }
             } else {
-                if (m1.length !== m2.length) {
+                if (dim1.filas !== dim2.filas || dim1.columnas !== dim2.columnas) {
                     res.writeHead(400, {
                         'Access-Control-Allow-Origin': '*',
                         'Content-Type': 'application/json'
@@ -122,18 +153,9 @@ const servidor = http.createServer(function(req, res) {
                     return;
                 }
 
-                // Lógica de suma arcaica
-                for (let i = 0; i < m1.length; i++) {
-                    if (!Array.isArray(m1[i]) || !Array.isArray(m2[i]) || m1[i].length !== m2[i].length) {
-                        res.writeHead(400, {
-                            'Access-Control-Allow-Origin': '*',
-                            'Content-Type': 'application/json'
-                        });
-                        res.end(JSON.stringify({ error: 'Dimensiones incompatibles' }));
-                        return;
-                    }
+                for (let i = 0; i < dim1.filas; i++) {
                     const filaRes = [];
-                    for (let j = 0; j < m1[i].length; j++) {
+                    for (let j = 0; j < dim1.columnas; j++) {
                         filaRes.push(m1[i][j] + m2[i][j]);
                     }
                     resultado.push(filaRes);

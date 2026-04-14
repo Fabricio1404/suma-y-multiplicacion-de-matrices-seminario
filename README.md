@@ -12,7 +12,7 @@ El frontend es un solo sitio web y permite elegir que backend usar:
 
 ## 1. Que hace el proyecto
 
-1. El usuario elige filas y columnas.
+1. El usuario elige filas y columnas para cada matriz.
 2. Se dibujan dos matrices para cargar datos.
 3. Se validan los datos (que no esten vacios y sean numericos).
 4. El usuario elige la operacion (suma o multiplicacion).
@@ -72,7 +72,7 @@ http://localhost:5000
 
 ## 6. Uso de la aplicacion
 
-1. Elegir cantidad de filas y columnas.
+1. Elegir filas y columnas para Matriz 1 y Matriz 2.
 2. Presionar "Generar Matrices".
 3. Cargar todos los valores numericos en Matriz 1 y Matriz 2.
 4. Elegir operacion:
